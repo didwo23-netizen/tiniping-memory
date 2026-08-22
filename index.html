@@ -138,22 +138,31 @@ h1,h2,h3,.display{font-family:'Jua','Apple SD Gothic Neo',sans-serif;font-weight
   transition:transform var(--dur) cubic-bezier(.3,1.4,.5,1);
 }
 .card.flipped .inner{transform:rotateY(180deg)}
+/* .face 는 3D 회전 + 뒷면 숨기기만 담당해요.
+   (사파리/아이패드는 backface-visibility:hidden 이 border-radius+overflow:hidden 과
+   같은 요소에 함께 있으면 뒷면을 제대로 못 숨기는 버그가 있어서, 둥근 모서리·그림자
+   같은 "보이는 효과"는 안쪽 .clip 요소로 분리했어요.) */
 .face{
-  position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;box-shadow:var(--shadow);overflow:hidden;
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
-.back{
+.face .clip{
+  position:absolute;inset:0;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);
+}
+.back .clip{
   background:linear-gradient(140deg,var(--turn-c),var(--turn-c2));
   display:grid;place-items:center;transition:background .45s;
 }
-.back::after{
+.back .clip::after{
   content:"";position:absolute;inset:0;opacity:.35;
   background-image:radial-gradient(circle at 50% 50%, #fff 1.4px, transparent 1.6px);
   background-size:14px 14px;
 }
 .back .mark{width:38%;color:#fff;opacity:.95;z-index:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.15))}
 .front{
-  transform:rotateY(180deg);background:#fff;
+  transform:rotateY(180deg);
+}
+.front .clip{
+  background:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
   border:3px solid var(--mc);
 }
@@ -461,8 +470,8 @@ function start(){
       ? `<img src="${m.img}" alt="${m.name}" onerror="this.replaceWith(makeArt('${m.fb}'))">`
       : `<div class="art">${svg(m.name)}</div>`;
     el.innerHTML = `<div class="inner">
-        <div class="face back"><div class="mark">${MARK}</div></div>
-        <div class="face front">${art}<div class="label">${m.name}</div></div>
+        <div class="face back"><div class="clip"><div class="mark">${MARK}</div></div></div>
+        <div class="face front"><div class="clip">${art}<div class="label">${m.name}</div></div></div>
       </div>`;
     el.addEventListener('click', ()=>flip(el, m));
     el.style.animation = `deal .4s ${i*26}ms both`;
